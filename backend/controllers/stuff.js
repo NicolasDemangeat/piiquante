@@ -6,12 +6,11 @@ exports.likeThing = (req, res, next) => {
 }
 
 exports.createThing = (req, res, next) => {
-    const thingObject = JSON.parse(req.body.thing);
-    delete thingObject._id;
+    const thingObject = JSON.parse(req.body.sauce);
     delete thingObject._userId;
+    const userId = req.auth.userId
     const thing = new Thing({
         ...thingObject,
-        userId: req.auth.userId,
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     });  
     thing.save()
@@ -19,16 +18,9 @@ exports.createThing = (req, res, next) => {
     .catch(error => { res.status(400).json({ error })})
 };
 
-exports.getOneThing = (req, res, next) => {
-  Thing.findOne({_id: req.params.id})
-    .then((thing) => {res.status(200).json(thing);})
-    .catch((error) => {res.status(404).json({ error: error });
-    });
-};
-
 exports.modifyThing = (req, res, next) => {
     const thingObject = req.file ? {
-        ...JSON.parse(req.body.thing),
+        ...JSON.parse(req.body.sauce),
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     } : { ...req.body };  
     delete thingObject._userId;
@@ -47,7 +39,16 @@ exports.modifyThing = (req, res, next) => {
         });
  };
 
- exports.deleteThing = (req, res, next) => {
+
+exports.getOneThing = (req, res, next) => {
+    Thing.findOne({_id: req.params.id})
+        .then((thing) => {res.status(200).json(thing);})
+        .catch((error) => {res.status(404).json({ error: error });
+        });
+};
+  
+
+exports.deleteThing = (req, res, next) => {
     Thing.findOne({ _id: req.params.id})
         .then(thing => {
             if (thing.userId != req.auth.userId) {
@@ -64,7 +65,7 @@ exports.modifyThing = (req, res, next) => {
         .catch( error => {
             res.status(500).json({ error });
         });
- };
+};
 
 exports.getAllStuff = (req, res, next) => {
     Thing.find().then((things) => {res.status(200).json(things);})
