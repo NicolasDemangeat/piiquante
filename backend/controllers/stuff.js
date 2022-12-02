@@ -1,6 +1,7 @@
 const Thing = require('../models/thing');
 const fs = require('fs');
 
+//manages likes and dislikes
 exports.likeThing = (req, res, next) => {
     const nbLike = req.body.like;
     const userId = req.body.userId;
@@ -47,6 +48,7 @@ exports.likeThing = (req, res, next) => {
     .catch(error => {res.status(404).json({ error })});
 }
 
+//Create new Thing in the DB
 exports.createThing = (req, res, next) => {
     const thingObject = JSON.parse(req.body.sauce);
     delete thingObject.userId;
@@ -60,6 +62,7 @@ exports.createThing = (req, res, next) => {
     .catch(error => { res.status(400).json({ error })})
 };
 
+//Update one Thing in he DB
 exports.modifyThing = (req, res, next) => {
     const thingObject = req.file ? {
         ...JSON.parse(req.body.sauce),
@@ -81,7 +84,7 @@ exports.modifyThing = (req, res, next) => {
         });
  };
 
-
+//Get one Thing in the DB
 exports.getOneThing = (req, res, next) => {
     Thing.findOne({_id: req.params.id})
         .then((thing) => {res.status(200).json(thing);})
@@ -89,7 +92,7 @@ exports.getOneThing = (req, res, next) => {
         });
 };
   
-
+//Delete one Thing in the DB
 exports.deleteThing = (req, res, next) => {
     Thing.findOne({ _id: req.params.id})
         .then(thing => {
@@ -109,6 +112,7 @@ exports.deleteThing = (req, res, next) => {
         });
 };
 
+//Get all the Thing in the DB
 exports.getAllStuff = (req, res, next) => {
     Thing.find().then((things) => {res.status(200).json(things);})
     .catch((error) => {res.status(400).json({error: error});});
