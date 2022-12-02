@@ -2,15 +2,57 @@ const Thing = require('../models/thing');
 const fs = require('fs');
 
 exports.likeThing = (req, res, next) => {
+    const nbLike = req.body.like;
+    const userId = req.body.userId;
+    const sauceId = req.params.id;
 
+    let removeDislike = {$pull: {usersDisliked: userId}, $inc: {dislikes: -1}};
+    let addDislike = {$push: {usersDisliked: userId}, $inc: {dislikes: +1}};
+    let removeLike = {$pull: {usersLiked: userId}, $inc: {likes: -1}};
+    let addLike = {$push: {usersLiked: userId}, $inc: {likes: +1}};
+
+    Thing.findOne({_id: req.params.id})
+    .then(sauce => {
+        if(nbLike===1){
+            if(sauce.usersLiked.includes(userId)){
+                Thing.updateOne({ _id : sauceId}, removeLike)
+                .then(() => res.status(200).json({message: "Like annulé"}))
+                .catch(error => res.status(401).json({error}))
+            }else{
+                Thing.updateOne({ _id : sauceId}, addLike)
+                .then(() => res.status(200).json({message: "Like enregistré"}))
+                .catch(error => res.status(401).json({error}))
+            }            
+        }else if(nbLike===-1){
+            if(sauce.usersDisliked.includes(userId)){
+                Thing.updateOne({ _id : sauceId}, removeDislike)
+                .then(() => res.status(200).json({message: "Like modifié"}))
+                .catch(error => res.status(401).json({error}))
+            }else{
+                Thing.updateOne({ _id : sauceId}, addDislike)
+                .then(() => res.status(200).json({message: "Like enregistré"}))
+                .catch(error => res.status(401).json({error}))
+            } 
+        }else if(nbLike===0){
+            if(sauce.usersLiked.includes(userId)){
+                Thing.updateOne({ _id : sauceId}, removeLike)
+                .then(() => res.status(200).json({message: "Like modifié"}))
+                .catch(error => res.status(401).json({error}))
+            }else if(sauce.usersDisliked.includes(userId)){
+                Thing.updateOne({ _id : sauceId}, removeDislike)
+                .then(() => res.status(200).json({message: "Like modifié"}))
+                .catch(error => res.status(401).json({error}))
+            }
+        }})
+    .catch(error => {res.status(404).json({ error })});
 }
 
 exports.createThing = (req, res, next) => {
     const thingObject = JSON.parse(req.body.sauce);
-    delete thingObject._userId;
-    const userId = req.auth.userId
+    delete thingObject.userId;
     const thing = new Thing({
         ...thingObject,
+        userId: req.auth.userId,
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     });  
     thing.save()
