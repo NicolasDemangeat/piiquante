@@ -27,21 +27,21 @@ exports.likeThing = (req, res, next) => {
         }else if(nbLike===-1){
             if(sauce.usersDisliked.includes(userId)){
                 Thing.updateOne({ _id : sauceId}, removeDislike)
-                .then(() => res.status(200).json({message: "Like modifié"}))
+                .then(() => res.status(200).json({message: "Dislike annulé"}))
                 .catch(error => res.status(401).json({error}))
             }else{
                 Thing.updateOne({ _id : sauceId}, addDislike)
-                .then(() => res.status(200).json({message: "Like enregistré"}))
+                .then(() => res.status(200).json({message: "Dislike enregistré"}))
                 .catch(error => res.status(401).json({error}))
             } 
         }else if(nbLike===0){
             if(sauce.usersLiked.includes(userId)){
                 Thing.updateOne({ _id : sauceId}, removeLike)
-                .then(() => res.status(200).json({message: "Like modifié"}))
+                .then(() => res.status(200).json({message: "Like annulé"}))
                 .catch(error => res.status(401).json({error}))
             }else if(sauce.usersDisliked.includes(userId)){
                 Thing.updateOne({ _id : sauceId}, removeDislike)
-                .then(() => res.status(200).json({message: "Like modifié"}))
+                .then(() => res.status(200).json({message: "Dislike annulé"}))
                 .catch(error => res.status(401).json({error}))
             }
         }})
